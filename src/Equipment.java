@@ -36,9 +36,14 @@ public class Equipment {
 
     /**
      * Updates the status of this item. Setting maintenance/unavailable zeroes quantity.
+     *
+     * OCL Constraint 22 - Equipment Status Consistency:
+     *   context Equipment inv StatusConsistency:
+     *     self.status = 'maintenance' implies self.quantityAvailable = 0
      */
     public void updateStatus(String newStatus) {
         this.status = newStatus;
+        // OCL Constraint 22 - maintenance status must zero the available quantity
         if (!newStatus.equals(STATUS_AVAILABLE)) {
             this.quantityAvailable = 0;
         }
@@ -47,10 +52,15 @@ public class Equipment {
 
     /**
      * Reserves a quantity of units. Returns false if not enough available.
+     *
+     * OCL Constraint 21 - Equipment Cannot Be Overbooked:
+     *   context Equipment inv NotOverbooked:
+     *     self.quantityAvailable >= 0 and self.quantityAvailable <= self.totalQuantity
      */
     public boolean reserve(int qty) {
         if (qty <= 0) throw new IllegalArgumentException("Quantity must be > 0.");
         if (!status.equals(STATUS_AVAILABLE)) return false;
+        // OCL Constraint 21 - cannot reserve more than available
         if (qty > quantityAvailable) return false;
         quantityAvailable -= qty;
         return true;
