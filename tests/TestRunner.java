@@ -2,6 +2,8 @@
  * Simple test runner. Runs all test classes and prints a summary.
  * No external libraries required.
  *
+ * Includes Milestone 2 tests and Milestone 3 OCL constraint tests.
+ *
  * Compile:  javac src/*.java tests/*.java -d out
  * Run:      java -cp out TestRunner
  */
@@ -20,6 +22,7 @@ public class TestRunner {
         TimeSlotTests.run();
         ReservationTests.run();
         BookingSystemTests.run();
+        OCLConstraintTests.run();
 
         System.out.println("\n" + "=".repeat(55));
         System.out.println("  Results: " + passed + " passed, " + failed + " failed.");

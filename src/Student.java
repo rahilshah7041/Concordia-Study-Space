@@ -47,9 +47,14 @@ public class Student extends User {
     /**
      * Confirms and stores a reservation for this student.
      * Checks suspension and policy before confirming.
+     *
+     * OCL Constraint 15 - Suspended Student Cannot Create Reservations:
+     *   context Student inv NotSuspended: self.strikeCount < 3
      */
     public void createReservation(Reservation reservation) {
         requireLogin();
+
+        // OCL Constraint 15 - Suspended Student Cannot Create Reservations
         if (isSuspended())
             throw new IllegalStateException(getName() + " is suspended and cannot make reservations.");
         if (!reservation.validatePolicy())
@@ -75,6 +80,14 @@ public class Student extends User {
 
     /**
      * Cancels a reservation. Issues a strike if cancelled within 30 min of start.
+     *
+     * OCL Constraint 18 - Late Cancellation Results in a Strike:
+     *   context Reservation inv LateCancelPenalty:
+     *     self.status = CANCELLED and self.timeSlot.minutesUntilStart() < 30
+     *     implies self.student.strikeCount >= 1
+     * OCL Constraint 19 - Cancelled Reservation Releases Room:
+     *   context Reservation inv ReleaseRoom:
+     *     self.status = CANCELLED implies self.room.isAvailable = true
      */
     public void cancelReservation(String reservationID) {
         requireLogin();
@@ -85,13 +98,14 @@ public class Student extends User {
         if (res.getStatus() == ReservationStatus.COMPLETED)
             throw new IllegalStateException("Cannot cancel a completed reservation.");
 
-        // Late cancellation strike (within 30 minutes of start)
+        // OCL Constraint 18 - Late cancellation strike (within 30 minutes of start)
         if (res.getTimeSlot().minutesUntilStart() < 30 &&
             res.getTimeSlot().minutesUntilStart() >= 0) {
             addStrike("Late cancellation for reservation " + reservationID);
         }
 
         res.setStatus(ReservationStatus.CANCELLED);
+        // OCL Constraint 19 - Cancelled reservation must release the room
         res.getRoom().setAvailable(true);
         System.out.println("[" + getName() + "] Reservation " + reservationID + " CANCELLED.");
     }
@@ -104,11 +118,22 @@ public class Student extends User {
             System.out.println("[" + getName() + "] *** SUSPENDED - max strikes reached. ***");
     }
 
-    /** Marks reservation as NO_SHOW and adds a strike. */
+    /**
+     * Marks reservation as NO_SHOW and adds a strike.
+     *
+     * OCL Constraint 17 - No-Show Must Generate Strike and Release Room:
+     *   context Reservation inv NoShowPenalty:
+     *     self.status = NO_SHOW implies self.student.strikeCount >= 1
+     * OCL Constraint 19 - No-Show Reservation Releases Room:
+     *   context Reservation inv ReleaseRoom:
+     *     self.status = NO_SHOW implies self.room.isAvailable = true
+     */
     public void markNoShow(String reservationID) {
         Reservation res = findReservation(reservationID);
         res.setStatus(ReservationStatus.NO_SHOW);
+        // OCL Constraint 19 - room must be released on no-show
         res.getRoom().setAvailable(true);
+        // OCL Constraint 17 - strike must be issued on no-show
         addStrike("No-show for reservation " + reservationID);
     }
 

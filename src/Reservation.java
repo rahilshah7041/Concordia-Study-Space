@@ -61,36 +61,88 @@ public class Reservation {
     /**
      * Validates the reservation against room and policy constraints.
      * Checks: future time slot, max duration, room availability, capacity.
+     *
+     * OCL Constraint 4  - Future Reservation Only:
+     *   context TimeSlot inv FutureReservation: self.startTime > currentTime
+     * OCL Constraint 5  - Reservation Duration Within Policy Limit:
+     *   context Reservation inv MaxDuration: self.calculateDuration() <= policy.maxDurationMinutes
+     * OCL Constraint 2  - Attendee Count Within Room Capacity:
+     *   context Reservation inv WithinCapacity: self.attendeeCount <= self.room.capacity
+     * OCL Constraint 16 - Confirmed Reservation Must Satisfy All Rules:
+     *   context Reservation inv ValidBeforeConfirm:
+     *     self.status = CONFIRMED implies self.attendeeCount > 0 and
+     *     self.attendeeCount <= self.room.capacity
      */
     public boolean validatePolicy() {
+        // OCL Constraint 4 - Future Reservation Only
+        // OCL Constraint 5 - Reservation Duration Within Policy Limit
         if (!timeSlot.isValidDuration()) {
             System.out.println("[Reservation:" + reservationID +
                     "] INVALID - time slot is in the past or exceeds system max.");
             return false;
         }
+
+        // OCL Constraint 5 - Reservation Duration Within Policy Limit
         if (calculateDuration() > policy.getMaxDurationMinutes()) {
             System.out.println("[Reservation:" + reservationID +
                     "] INVALID - duration exceeds policy maximum of " +
                     policy.getMaxDurationMinutes() + " min.");
             return false;
         }
+
         if (!room.isAvailable()) {
             System.out.println("[Reservation:" + reservationID +
                     "] INVALID - room " + room.getRoomID() + " is not available.");
             return false;
         }
+
+        // OCL Constraint 2  - Attendee Count Within Room Capacity
+        // OCL Constraint 16 - Confirmed Reservation Must Satisfy All Rules
         if (!room.checkCapacity(attendeeCount)) {
             System.out.println("[Reservation:" + reservationID +
                     "] INVALID - " + attendeeCount + " attendees exceed room capacity of " +
                     room.getCapacity() + ".");
             return false;
         }
+
+        // OCL Constraint 16 - attendeeCount must be > 0 before confirmation
+        if (attendeeCount <= 0) {
+            System.out.println("[Reservation:" + reservationID +
+                    "] INVALID - attendee count must be greater than 0.");
+            return false;
+        }
+
         return true;
     }
 
-    /** Attaches an EquipmentBooking to this reservation. */
+    /**
+     * Attaches an EquipmentBooking to this reservation.
+     *
+     * OCL Constraint 10 - Equipment Must Be Available:
+     *   context Reservation inv EquipmentAvailable:
+     *     self.equipment->forAll(e | e.status = 'available' and e.quantityAvailable > 0)
+     * OCL Constraint 20 - Equipment Cannot Be Added to Inactive Reservations:
+     *   context Reservation inv EquipmentOnlyActive:
+     *     self.status = CONFIRMED implies self.equipment->forAll(e | e.status = 'available')
+     */
     public void addEquipmentBooking(EquipmentBooking eb) {
         if (eb == null) throw new IllegalArgumentException("EquipmentBooking cannot be null.");
+
+        // OCL Constraint 20 - equipment can only be added to active (PENDING/CONFIRMED) reservations
+        if (status == ReservationStatus.CANCELLED ||
+            status == ReservationStatus.COMPLETED ||
+            status == ReservationStatus.NO_SHOW) {
+            throw new IllegalStateException(
+                "OCL Constraint 20: Equipment cannot be added to an inactive reservation (status: " + status + ").");
+        }
+
+        // OCL Constraint 10 - equipment must be available
+        if (!eb.getEquipment().getStatus().equals(Equipment.STATUS_AVAILABLE)) {
+            throw new IllegalStateException(
+                "OCL Constraint 10: Equipment " + eb.getEquipment().getItemID() +
+                " is not available (status: " + eb.getEquipment().getStatus() + ").");
+        }
+
         equipmentBookings.add(eb);
     }
 

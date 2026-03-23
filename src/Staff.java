@@ -56,11 +56,16 @@ public class Staff extends User {
 
     /**
      * Approves a PENDING reservation.
+     *
+     * OCL Constraint 25 - Only Pending Reservations Can Be Approved:
+     *   context Reservation inv OnlyValidConfirmed:
+     *     self.status = CONFIRMED implies self.attendeeCount > 0
      */
     public void approveReservation(Reservation reservation) {
         requireLogin();
+        // OCL Constraint 25 - only PENDING reservations can be approved
         if (reservation.getStatus() != ReservationStatus.PENDING)
-            throw new IllegalStateException("Only PENDING reservations can be approved.");
+            throw new IllegalStateException("OCL Constraint 25: Only PENDING reservations can be approved.");
         reservation.setStatus(ReservationStatus.CONFIRMED);
         System.out.println("[Staff:" + getName() + "] Reservation " +
                 reservation.getReservationID() + " APPROVED.");
