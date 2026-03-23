@@ -1,5 +1,5 @@
 # CSEBS – Concordia Study Space & Equipment Booking System
-### COEN 6312 – Milestone 2 | Winter 2026
+### COEN 6312 – Milestone 3 | Winter 2026
 
 ---
 
@@ -21,6 +21,7 @@ CSEBS/
 │   ├── Notification.java
 │   ├── Policy.java
 │   ├── BookingSystem.java
+│   ├── Demo.java
 │   └── Main.java
 │
 └── tests/                ← Unit tests (no external libraries needed)
@@ -29,7 +30,8 @@ CSEBS/
     ├── RoomEquipmentTests.java
     ├── TimeSlotTests.java
     ├── ReservationTests.java
-    └── BookingSystemTests.java
+    ├── BookingSystemTests.java
+    └── OCLConstraintTests.java   ← Milestone 3: OCL constraint tests
 ```
 
 ---
@@ -61,26 +63,55 @@ javac -d out src/*.java tests/*.java
 
 ---
 
-### Step 2 – Run the demo
+### Step 2 – Run the interactive app
 
 ```bash
 java -cp out Main
 ```
 
-This runs all 18 demo scenarios showing interactions between every class.
+Launches the interactive CLI where you can log in, book rooms, add equipment, check in, and more.
 
 ---
 
-### Step 3 – Run the unit tests
+### Step 3 – Run the scripted demo
+
+```bash
+java -cp out Demo
+```
+
+Runs all scenarios automatically showing interactions between every class.
+
+---
+
+### Step 4 – Run the unit tests
 
 ```bash
 java -cp out TestRunner
 ```
 
-Expected output ends with:
-```
-Results: 57 passed, 0 failed.
-```
+Runs all Milestone 2 tests plus the Milestone 3 OCL constraint tests.
+
+---
+
+## OCL Constraints Implemented (Milestone 3)
+
+13 constraints are implemented across the codebase, marked with comments of the form `// OCL Constraint N`:
+
+| Constraint | Description | Enforced In |
+|---|---|---|
+| 2  | Attendee count within room capacity | Reservation.validatePolicy() |
+| 5  | Reservation duration within policy limit | Reservation.validatePolicy() |
+| 10 | Equipment must be available | BookingSystem, Reservation |
+| 13 | No overlapping reservations for same room | BookingSystem.checkDoubleBooking() |
+| 14 | Daily reservation limit per student | BookingSystem.checkDailyLimit() |
+| 15 | Suspended student cannot reserve | Student.createReservation() |
+| 16 | Confirmed reservation must satisfy all rules | Reservation.validatePolicy() |
+| 17 | No-show must generate strike and release room | Student.markNoShow() |
+| 18 | Late cancellation results in a strike | Student.cancelReservation() |
+| 19 | Cancelled or no-show reservation releases room | Student.cancelReservation(), markNoShow() |
+| 21 | Equipment cannot be overbooked | BookingSystem, Equipment.reserve() |
+| 22 | Equipment status consistency | Equipment.updateStatus() |
+| 25 | Only pending reservations can be approved | Staff.approveReservation() |
 
 ---
 
