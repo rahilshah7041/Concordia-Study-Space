@@ -66,6 +66,7 @@ public class Staff extends User {
         // OCL Constraint 25 - only PENDING reservations can be approved
         if (reservation.getStatus() != ReservationStatus.PENDING)
             throw new IllegalStateException("OCL Constraint 25: Only PENDING reservations can be approved.");
+        // STATE TRANSITION (Reservation): PENDING --> CONFIRMED
         reservation.setStatus(ReservationStatus.CONFIRMED);
         System.out.println("[Staff:" + getName() + "] Reservation " +
                 reservation.getReservationID() + " APPROVED.");
@@ -76,7 +77,9 @@ public class Staff extends User {
      */
     public void overrideReservation(Reservation reservation, String reason) {
         requireLogin();
+        // STATE TRANSITION (Reservation): PENDING/CONFIRMED --> CANCELLED
         reservation.setStatus(ReservationStatus.CANCELLED);
+        // STATE TRANSITION (Room): BOOKED --> AVAILABLE
         reservation.getRoom().setAvailable(true);
         System.out.println("[Staff:" + getName() + "] Reservation " +
                 reservation.getReservationID() + " OVERRIDDEN. Reason: " + reason);

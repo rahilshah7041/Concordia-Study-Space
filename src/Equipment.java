@@ -31,6 +31,7 @@ public class Equipment {
         this.type              = type;
         this.totalQuantity     = totalQuantity;
         this.quantityAvailable = totalQuantity;
+        // STATE TRANSITION (Equipment): [*] --> AVAILABLE
         this.status            = STATUS_AVAILABLE;
     }
 
@@ -40,6 +41,14 @@ public class Equipment {
      * OCL Constraint 22 - Equipment Status Consistency:
      *   context Equipment inv StatusConsistency:
      *     self.status = 'maintenance' implies self.quantityAvailable = 0
+     *
+     * STATE TRANSITIONS (Equipment):
+     *   AVAILABLE --> MAINTENANCE : updateStatus("maintenance")
+     *   AVAILABLE --> UNAVAILABLE : updateStatus("unavailable")
+     *   MAINTENANCE --> AVAILABLE : updateStatus("available")
+     *   UNAVAILABLE --> AVAILABLE : updateStatus("available")
+     *   MAINTENANCE --> UNAVAILABLE: updateStatus("unavailable")
+     *   UNAVAILABLE --> MAINTENANCE: updateStatus("maintenance")
      */
     public void updateStatus(String newStatus) {
         this.status = newStatus;
@@ -52,6 +61,7 @@ public class Equipment {
 
     /**
      * Reserves a quantity of units. Returns false if not enough available.
+     * STATE TRANSITION (Equipment): self-transition on AVAILABLE state
      *
      * OCL Constraint 21 - Equipment Cannot Be Overbooked:
      *   context Equipment inv NotOverbooked:
@@ -68,6 +78,7 @@ public class Equipment {
 
     /**
      * Returns units back to the available pool.
+     * STATE TRANSITION (Equipment): self-transition on AVAILABLE state
      */
     public void release(int qty) {
         if (qty <= 0) throw new IllegalArgumentException("Quantity must be > 0.");

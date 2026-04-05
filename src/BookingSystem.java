@@ -71,6 +71,7 @@ public class BookingSystem {
 
         student.createReservation(res); // sets CONFIRMED inside
 
+        // STATE TRANSITION (Room): AVAILABLE --> BOOKED
         room.setAvailable(false);
         reservations.add(res);
 
