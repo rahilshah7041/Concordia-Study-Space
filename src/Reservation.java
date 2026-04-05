@@ -48,6 +48,7 @@ public class Reservation {
         this.timeSlot      = timeSlot;
         this.attendeeCount = attendeeCount;
         this.policy        = policy;
+        // STATE TRANSITION (Reservation): [*] --> PENDING
         this.status        = ReservationStatus.PENDING;
     }
 
@@ -162,7 +163,16 @@ public class Reservation {
     public Notification        getNotification()     { return notification; }
     public List<EquipmentBooking> getEquipmentBookings() { return equipmentBookings; }
 
-    public void setStatus(ReservationStatus status)      { this.status = status; }
+    public void setStatus(ReservationStatus status) {
+        // STATE TRANSITION (Reservation): current --> status
+        // Valid transitions:
+        //   PENDING    --> CONFIRMED  : createReservation() / approveReservation()
+        //   PENDING    --> CANCELLED  : overrideReservation()
+        //   CONFIRMED  --> COMPLETED  : checkIn()
+        //   CONFIRMED  --> CANCELLED  : cancelReservation() / overrideReservation()
+        //   CONFIRMED  --> NO_SHOW    : markNoShow()
+        this.status = status;
+    }
     public void setNotification(Notification n)          { this.notification = n; }
 
     @Override

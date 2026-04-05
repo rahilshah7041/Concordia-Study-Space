@@ -1,5 +1,5 @@
 # CSEBS – Concordia Study Space & Equipment Booking System
-### COEN 6312 – Milestone 3 | Winter 2026
+### COEN 6312 – Milestone 4 | Winter 2026
 
 ---
 
@@ -89,7 +89,20 @@ Runs all scenarios automatically showing interactions between every class.
 java -cp out TestRunner
 ```
 
-Runs all Milestone 2 tests plus the Milestone 3 OCL constraint tests.
+Runs all Milestone 2 tests, Milestone 3 OCL constraint tests. All 121 tests should pass.
+
+---
+
+## State Diagrams Implemented (Milestone 4)
+
+State transitions are implemented and marked with comments of the form `// STATE TRANSITION (ClassName): STATE --> STATE` in the relevant source files:
+
+| Class | States | Implemented In |
+|---|---|---|
+| Reservation | PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW | Reservation.java, Student.java, Staff.java |
+| Student | ACTIVE, STRIKE_1, STRIKE_2, SUSPENDED | Student.java |
+| Equipment | AVAILABLE, MAINTENANCE, UNAVAILABLE | Equipment.java |
+| Room | AVAILABLE, BOOKED | Room.java, BookingSystem.java |
 
 ---
 

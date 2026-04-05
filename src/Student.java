@@ -60,6 +60,7 @@ public class Student extends User {
         if (!reservation.validatePolicy())
             throw new IllegalStateException("Reservation failed policy validation.");
 
+        // STATE TRANSITION (Reservation): PENDING --> CONFIRMED
         reservation.setStatus(ReservationStatus.CONFIRMED);
         reservations.add(reservation);
         System.out.println("[" + getName() + "] Reservation " +
@@ -74,6 +75,7 @@ public class Student extends User {
         Reservation res = findReservation(reservationID);
         if (res.getStatus() != ReservationStatus.CONFIRMED)
             throw new IllegalStateException("Can only check in to a CONFIRMED reservation.");
+        // STATE TRANSITION (Reservation): CONFIRMED --> COMPLETED
         res.setStatus(ReservationStatus.COMPLETED);
         System.out.println("[" + getName() + "] Checked in to reservation " + reservationID + ".");
     }
@@ -104,8 +106,10 @@ public class Student extends User {
             addStrike("Late cancellation for reservation " + reservationID);
         }
 
+        // STATE TRANSITION (Reservation): CONFIRMED/PENDING --> CANCELLED
         res.setStatus(ReservationStatus.CANCELLED);
         // OCL Constraint 19 - Cancelled reservation must release the room
+        // STATE TRANSITION (Room): BOOKED --> AVAILABLE
         res.getRoom().setAvailable(true);
         System.out.println("[" + getName() + "] Reservation " + reservationID + " CANCELLED.");
     }
@@ -114,6 +118,10 @@ public class Student extends User {
     public void addStrike(String reason) {
         strikeCount++;
         System.out.println("[" + getName() + "] Strike #" + strikeCount + " - Reason: " + reason);
+        // STATE TRANSITION (Student):
+        //   strikeCount = 1 : ACTIVE   --> STRIKE_1
+        //   strikeCount = 2 : STRIKE_1 --> STRIKE_2
+        //   strikeCount >= 3: STRIKE_2 --> SUSPENDED
         if (isSuspended())
             System.out.println("[" + getName() + "] *** SUSPENDED - max strikes reached. ***");
     }
@@ -130,8 +138,10 @@ public class Student extends User {
      */
     public void markNoShow(String reservationID) {
         Reservation res = findReservation(reservationID);
+        // STATE TRANSITION (Reservation): CONFIRMED --> NO_SHOW
         res.setStatus(ReservationStatus.NO_SHOW);
         // OCL Constraint 19 - room must be released on no-show
+        // STATE TRANSITION (Room): BOOKED --> AVAILABLE
         res.getRoom().setAvailable(true);
         // OCL Constraint 17 - strike must be issued on no-show
         addStrike("No-show for reservation " + reservationID);

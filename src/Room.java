@@ -18,13 +18,14 @@ public class Room {
     public Room(String roomID, String building, int capacity) {
         if (roomID == null || roomID.isEmpty())
             throw new IllegalArgumentException("roomID cannot be empty.");
-        if (building == null || building.isEmpty())
+        if (building == null || building.isBlank())
             throw new IllegalArgumentException("building cannot be empty.");
         if (capacity <= 0)
             throw new IllegalArgumentException("capacity must be greater than 0.");
         this.roomID      = roomID;
         this.building    = building;
         this.capacity    = capacity;
+        // STATE TRANSITION (Room): [*] --> AVAILABLE
         this.isAvailable = true;
     }
 
@@ -36,11 +37,19 @@ public class Room {
     }
 
     // ── Getters / Setters ─────────────────────────────────────────
-    public String  getRoomID()              { return roomID; }
-    public String  getBuilding()            { return building; }
-    public int     getCapacity()            { return capacity; }
-    public boolean isAvailable()            { return isAvailable; }
-    public void    setAvailable(boolean v)  { this.isAvailable = v; }
+    public String  getRoomID()             { return roomID; }
+    public String  getBuilding()           { return building; }
+    public int     getCapacity()           { return capacity; }
+    public boolean isAvailable()           { return isAvailable; }
+
+    /**
+     * Sets the availability of this room.
+     * STATE TRANSITIONS (Room):
+     *   AVAILABLE --> BOOKED    : setAvailable(false) called from bookRoom()
+     *   BOOKED    --> AVAILABLE : setAvailable(true)  called from cancelReservation(),
+     *                             markNoShow(), overrideReservation(), checkIn() completed
+     */
+    public void setAvailable(boolean v) { this.isAvailable = v; }
 
     @Override
     public String toString() {
