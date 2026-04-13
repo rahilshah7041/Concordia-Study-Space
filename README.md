@@ -1,5 +1,5 @@
 # CSEBS – Concordia Study Space & Equipment Booking System
-### COEN 6312 – Milestone 4 | Winter 2026
+### COEN 6312 – Winter 2026
 
 ---
 
@@ -38,7 +38,7 @@ CSEBS/
 
 ## Requirements
 
-- Java 11 or higher (Java 17 / 21 also works)
+- Java 21 or higher
 - No Maven, no external libraries
 
 ---
